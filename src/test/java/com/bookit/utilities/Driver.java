@@ -2,8 +2,11 @@ package com.bookit.utilities;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +38,8 @@ public class Driver {
                 We read our browser type from configuration.properties file using.
                 getProperty method we're creating in ConfigurationReader clas.
                  */
-            String browserType = ConfigurationReader.getProperty("browser");
+            String browserType = ConfigurationReader.getProperty("browser") != null ? browserType =
+                    System.getProperty("browser") : ConfigurationReader.getProperty("browser");
 
                 /*
                 Depending on the browser type our switch statement will determine to open specific type of browser/driver
@@ -44,15 +48,27 @@ public class Driver {
                 case "chrome":
                     WebDriverManager.chromedriver().setup();
                     driverPool.set(new ChromeDriver());
-                    driverPool.get().manage().window().maximize();
-                    driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+//                    driverPool.get().manage().window().maximize();
+//                    driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+                    break;
+                case "chrome-headless":
+                    WebDriverManager.chromedriver().setup();
+                    driverPool.set(new ChromeDriver(new ChromeOptions().setHeadless(true)));
                     break;
                 case "firefox":
                     WebDriverManager.firefoxdriver().setup();
                     driverPool.set(new FirefoxDriver());
-                    driverPool.get().manage().window().maximize();
-                    driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+//                    driverPool.get().manage().window().maximize();
+//                    driverPool.get().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
                     break;
+                case "firefox-headless":
+                    WebDriverManager.firefoxdriver().setup();
+                    driverPool.set(new FirefoxDriver(new FirefoxOptions().setHeadless(true)));
+                    break;
+                case "ie" :
+                    if (!System.getProperty("os.name").toLowerCase().contains("windows"))
+                        throw new WebDriverException("Your OS doesn't support Internet Explorer");
+                    WebDriverManager.iedriver().setup();
                 }
             }
         }
@@ -74,4 +90,5 @@ public class Driver {
             driverPool.remove();
         }
     }
+
 }
